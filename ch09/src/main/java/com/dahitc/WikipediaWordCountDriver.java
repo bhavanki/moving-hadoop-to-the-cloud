@@ -25,7 +25,7 @@ public class WikipediaWordCountDriver extends Configured implements Tool {
 
     conf.setMapperClass(WikipediaWordCountMapper.class);
     conf.setReducerClass(WikipediaWordCountReducer.class);
-    conf.setReducerClass(WikipediaWordCountReducer.class);
+    conf.setCombinerClass(WikipediaWordCountReducer.class);
     conf.setOutputKeyClass(Text.class);
     conf.setOutputValueClass(IntWritable.class);
 
