@@ -14,17 +14,17 @@ import org.apache.hadoop.util.ToolRunner;
  * Reads a Wikipedia XML dump file and extracts each article's text into
  * sequence files.
  */
-public class WikipediaDumpETLDriver extends Configured implements Tool {
+public class WikipediaDumpLoaderDriver extends Configured implements Tool {
 
   @Override
   public int run(String[] args) throws Exception {
     // arg checks
 
     JobConf conf = new JobConf(getClass());
-    conf.setJobName("WP dump ETL");
+    conf.setJobName("WP dump loader");
 
     // Set the mapper class, but skip the reduce phase
-    conf.setMapperClass(WikipediaDumpETLMapper.class);
+    conf.setMapperClass(WikipediaDumpLoaderMapper.class);
     conf.setNumReduceTasks(0);
     // The object key/value pairs are text
     conf.setOutputKeyClass(Text.class);
@@ -47,7 +47,7 @@ public class WikipediaDumpETLDriver extends Configured implements Tool {
   }
 
   public static void main(String[] args) throws Exception {
-    int exitCode = ToolRunner.run(new WikipediaDumpETLDriver(), args);
+    int exitCode = ToolRunner.run(new WikipediaDumpLoaderDriver(), args);
     System.exit(exitCode);
   }
 }

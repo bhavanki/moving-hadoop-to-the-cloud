@@ -21,7 +21,7 @@ import org.xml.sax.SAXException;
  * Mapper that parses the XML for a Wikipedia article and emits the article's
  * title and text content.
  */
-public class WikipediaDumpETLMapper extends MapReduceBase
+public class WikipediaDumpLoaderMapper extends MapReduceBase
   implements Mapper<Text, Text, Text, Text> {
 
   private enum Counter { ARTICLES }
