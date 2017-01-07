@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package com.dahitc;
+package com.mh2c;
 
 import java.io.IOException;
 import java.io.StringReader;

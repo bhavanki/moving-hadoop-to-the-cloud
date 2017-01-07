@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package com.dahitc;
+package com.mh2c;
 
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
