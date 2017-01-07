@@ -4,4 +4,4 @@ This repository holds source code included or referred to in the book [Moving Ha
 
 ## License
 
-Source code in this repository is licensed under the [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0.html).
+Source code in this repository is licensed under the [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0.html). See [NOTICE.md](NOTICE.md) for third-party licenses.
