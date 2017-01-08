@@ -73,8 +73,7 @@ public class LogGenerator {
     }
   }
 
-  private static final String FORMAT =
-    "%s - - [%s] \"%s %s HTTP/1.0\" %s %d \"%s\" \"%s\"";
+  private static final String FORMAT = "%s - - [%s] \"%s %s HTTP/1.0\" %s %d \"%s\" \"%s\"";
 
   private Random random = new Random();
   private Faker faker = new Faker();
@@ -107,13 +106,14 @@ public class LogGenerator {
     Pair.create("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:50.0) Gecko/20100101 Firefox/50.0", 2.1)
   );
 
+  @SafeVarargs
   private static EnumeratedDistribution<String> makeDistribution(Pair<String, Double>... items) {
     return new EnumeratedDistribution<String>(Arrays.asList(items));
   }
 
   private String generateLogLine() {
     String ipAddress = faker.internet().privateIpV4Address();
-    String datetime = TIMESTAMP_FORMATTER.format(ZonedDateTime.now());
+    String dateTime = TIMESTAMP_FORMATTER.format(ZonedDateTime.now());
     String method = METHODS.sample();
     String resource = RESOURCES.sample();
     String status = RESPONSES.sample();
@@ -121,7 +121,7 @@ public class LogGenerator {
     String referer = faker.internet().url();
     String userAgent = USER_AGENTS.sample();
 
-    return String.format(FORMAT, ipAddress, datetime, method, resource, status, bytes, referer,
+    return String.format(FORMAT, ipAddress, dateTime, method, resource, status, bytes, referer,
                          userAgent);
   }
 
