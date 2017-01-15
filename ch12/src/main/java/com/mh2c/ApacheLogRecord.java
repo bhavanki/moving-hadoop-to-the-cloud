@@ -22,6 +22,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * A class representing a simplified Apache access log record.
+ */
 public class ApacheLogRecord implements Serializable {
 
   private final String ipAddress;
@@ -32,6 +35,17 @@ public class ApacheLogRecord implements Serializable {
   private final long bytes;
   private final String userAgent;
 
+  /**
+   * Creates a new record.
+   *
+   * @param ipAddress IP address
+   * @param dateTime timestamp
+   * @param method HTTP method
+   * @param resource URL of resource accessed
+   * @param status HTTP response code
+   * @param bytes number of bytes in response
+   * @param userAgent user agent string
+   */
   public ApacheLogRecord(String ipAddress, ZonedDateTime dateTime, String method,
                          String resource, int status, long bytes, String userAgent) {
     this.ipAddress = ipAddress;
@@ -71,11 +85,23 @@ public class ApacheLogRecord implements Serializable {
     return userAgent;
   }
 
+  /**
+   * Creates a copy of this record with a different IP address.
+   *
+   * @param ipAddress new IP address
+   * @return new record
+   */
   public ApacheLogRecord withIpAddress(String ipAddress) {
     return new ApacheLogRecord(ipAddress, this.dateTime, this.method, this.resource, this.status,
                                this.bytes, this.userAgent);
   }
 
+  /**
+   * Creates a copy of this record with a different user agent string.
+   *
+   * @param userAgent new user agent string
+   * @return new record
+   */
   public ApacheLogRecord withUserAgent(String userAgent) {
     return new ApacheLogRecord(this.ipAddress, this.dateTime, this.method, this.resource,
                                this.status, this.bytes, userAgent);
@@ -87,6 +113,12 @@ public class ApacheLogRecord implements Serializable {
   static final DateTimeFormatter TIMESTAMP_FORMATTER =
     DateTimeFormatter.ofPattern("dd/MMM/yyyy:HH:mm:ss Z");
 
+  /**
+   * Parses a new record from a string.
+   *
+   * @param logLine line from access log
+   * @throws IllegalArgumentException if the line cannot be parsed
+   */
   public ApacheLogRecord(String logLine) {
     Matcher m = PARSE_PATTERN.matcher(logLine);
     if (!m.find()) {

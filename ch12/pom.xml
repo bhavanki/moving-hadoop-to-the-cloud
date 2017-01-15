@@ -32,11 +32,11 @@ limitations under the License.
       <dependency>
         <groupId>com.amazonaws</groupId>
         <artifactId>aws-java-sdk-bom</artifactId>
-        <version>1.10.77</version><!-- KCL requires 1.10 -->
+        <version>1.10.20</version><!-- KCL in Spark 2.1.0 uses 1.10.20 -->
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-      <!-- Jackson libs in AWS 1.10.77 are too old for Spark 2 -->
+      <!-- Jackson libs in AWS 1.10 are too old for Spark 2 -->
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
@@ -69,6 +69,7 @@ limitations under the License.
       <groupId>org.apache.spark</groupId>
       <artifactId>spark-streaming_2.11</artifactId>
       <version>2.1.0</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.spark</groupId>
@@ -105,6 +106,15 @@ limitations under the License.
             <goals>
               <goal>shade</goal>
             </goals>
+            <configuration>
+              <relocations>
+                <!-- Apache Commons HTTPClient in Hadoop may conflict -->
+                <relocation>
+                  <pattern>org.apache.http</pattern>
+                  <shadedPattern>com.mh2c.shaded.org.apache.http</shadedPattern>
+                </relocation>
+              </relocations>
+            </configuration>
           </execution>
         </executions>
       </plugin>
