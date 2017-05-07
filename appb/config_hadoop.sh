@@ -130,10 +130,10 @@ for i in $(seq 1 "$NUM_WORKERS"); do
   swap_in /etc/hadoop/yarn-site.xml "worker${i}.ip" "$w"
 done
 if [[ -n $ON_SECOND_MANAGER ]]; then
-  # TBD: change yarn.resourcemanager.ha.id to "rm2"
+  # Change YARN RM HA ID to rm2 on the second manager
+  sudo sed -i 's/<value>rm1</<value>rm2</' /etc/hadoop/yarn-site.xml
   echo
 fi
-# TBD: remove yarn.resourcemanager.ha.id from worker copies
 
 # Write slaves file based on known worker IP addresses
 echo "- /etc/hadoop/slaves"
@@ -189,6 +189,19 @@ if [[ -z $ON_SECOND_MANAGER ]]; then
       ssh "$w" sudo cp "$(basename "$f")" "$f"
     done
   done
+
+  # If configuring for HA (and running on first manager), remove
+  # yarn.resourcemanager.ha.id from worker copies of yarn-site.xml
+  if [[ -n $MANAGER2_IP ]]; then
+    echo
+    echo "Removing YARN RM HA ID from workers"
+    for w in "${WORKER_IPS[@]}"; do
+      echo "- $w"
+      ssh "$w" sudo sed -i \
+        '/\<name\>yarn.resourcemanager.ha.id\</,/\<property\>/d' \
+        /etc/hadoop/yarn-site.xml
+    done
+  fi
 
   # Create ZooKeeper myid files, assigning a unique number per worker
   echo
