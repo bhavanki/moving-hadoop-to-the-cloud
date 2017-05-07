@@ -22,6 +22,7 @@ if [[ -z $1 ]]; then
   exit
 fi
 
+# Define enviroment variables Hive expects
 export HADOOP_HOME=/opt/hadoop
 export HIVE_HOME=/opt/hive
 export SPARK_HOME=/opt/spark
@@ -45,7 +46,7 @@ case "$1" in
       exit
     fi
     echo Stopping HiveServer2
-    kill $(cat "${HS2_PID_FILE}")
+    kill "$(cat "${HS2_PID_FILE}")"
     ;;
   status)
     if [[ ! -f "${HS2_PID_FILE}" ]]; then

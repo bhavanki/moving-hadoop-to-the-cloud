@@ -34,7 +34,7 @@ if (( $# < 2 )); then
   exit 1
 fi
 
-# Collect required IP addresses
+# Collect required IP addresses: this worker, and other workers
 NEW_WORKER_IP="$1"
 shift
 WORKER_IPS=( "$@" )
@@ -50,12 +50,14 @@ echo
 echo "Substituting IP addresses and hostnames into Hadoop configurations"
 echo
 
+# Rewrite slaves file based on known worker IP addresses
 echo "- /etc/hadoop/slaves"
 printf '%s\n' "${WORKER_IPS[@]}" | sudo tee /etc/hadoop/slaves > /dev/null
 
 echo
 echo "IP address and hostname substitutions complete"
 
+# Copy out configuration files to the new worker
 echo
 echo "Copying configurations out to new worker"
 WORKER_FILES=(/etc/hadoop/core-site.xml

@@ -92,10 +92,11 @@ if [[ ${#ACCOUNTS[@]} == 0 ]]; then
   exit 1
 fi
 
-# Collect required IP addresses
+# Find manager IP addresses: "public IP:private IP"
 MANAGER_PUBLIC_IP="${1%%:*}"
 MANAGER_PRIVATE_IP="${1##*:}"
 shift
+# Collect remaining IP address pairs for workers
 WORKER_IPS=( "$@" )
 
 NUM_WORKERS=${#WORKER_IPS[@]}
@@ -107,6 +108,7 @@ echo "Manager hostname: $MANAGER_HOSTNAME"
 echo "${NUM_WORKERS} worker IPs: ${WORKER_IPS[*]}"
 echo "Accounts: ${ACCOUNTS[*]}"
 
+# Construct the SSH command with the provided identity file and username
 SSH_CMD=( ssh )
 if [[ -n $SSH_IDENTITY ]]; then
   SSH_CMD+=( -i "$SSH_IDENTITY" )
@@ -115,8 +117,10 @@ if [[ -n $SSH_USER ]]; then
   SSH_CMD+=( -o "User=$SSH_USER" )
 fi
 
+# For each account ...
 for acct in "${ACCOUNTS[@]}"; do
 
+  # Note whether this account is the one used for SSH connections by this script
   if [[ -n $SSH_USER && "$acct" == "$SSH_USER" ]]; then
     issshuser=1
   else
@@ -125,10 +129,14 @@ for acct in "${ACCOUNTS[@]}"; do
 
   echo
   if [[ -z $DO_NOT_GENERATE ]]; then
+    # Generate a key pair on the manager instance using ssh-keygen
     echo "[$acct] Generating manager SSH key pair"
     "${SSH_CMD[@]}" -t "${MANAGER_PUBLIC_IP}" "sudo -u \"$acct\" ssh-keygen" \
       "-t rsa -b 2048 -f /home/$acct/.ssh/id_rsa -N ''"
 
+    # Copy the new public key to the authorized_keys file on the manager
+    # - If this account is the one being used by this script, then just
+    #   append it to authorized_keys, don't outright replace the file
     echo "[$acct] Copying public SSH key to authorized_keys on manager"
     if [[ -n $issshuser ]]; then
       "${SSH_CMD[@]}" -t "${MANAGER_PUBLIC_IP}" \
@@ -139,12 +147,14 @@ for acct in "${ACCOUNTS[@]}"; do
         "sudo cat /home/$acct/.ssh/id_rsa.pub | sudo -u \"$acct\"" \
         "tee /home/$acct/.ssh/authorized_keys > /dev/null"
     fi
+    # Set the permissions for authorized_keys appropriately
     "${SSH_CMD[@]}" -t "${MANAGER_PUBLIC_IP}" \
       "sudo chmod 600 /home/$acct/.ssh/authorized_keys"
   else
     echo "[$acct] Skipping manager SSH key pair generation"
   fi
 
+  # Get the new public key
   echo "[$acct] Retrieving public SSH key"
   pubkey="$( "${SSH_CMD[@]}" -t "${MANAGER_PUBLIC_IP}" \
     "sudo cat /home/$acct/.ssh/id_rsa.pub" )"
@@ -153,8 +163,12 @@ for acct in "${ACCOUNTS[@]}"; do
   echo "$pubkey"
   echo "----"
 
+  # For each worker ...
   for worker_ips in "${WORKER_IPS[@]}"; do
 
+    # Write the public key to the authorized_keys file on the worker, creating
+    # it and its directory if necessary
+    # - Again, just append to the file if the account is being used here
     worker=${worker_ips%%:*}
     echo
     echo "[$acct] Installing public SSH key on $worker"
@@ -172,6 +186,8 @@ for acct in "${ACCOUNTS[@]}"; do
 
   done
 
+  # Connect from the manager instance to itself and each worker so that the
+  # new host keys are accepted now; this avoids being asked interactively later
   echo
   echo "[$acct] Connecting to each cluster instance from manager to accept host keys"
   if [[ -n $MANAGER_HOSTNAME ]]; then

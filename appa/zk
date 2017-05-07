@@ -22,6 +22,7 @@ if [[ -z $1 ]]; then
   exit
 fi
 
+# Assumption is that each "slave" hosts a ZooKeeper server
 SLAVES=( $(cat /etc/hadoop/slaves) )
 
 case "$1" in

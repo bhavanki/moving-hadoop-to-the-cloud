@@ -84,7 +84,7 @@ if [[ -n $ON_SECOND_MANAGER && -z $MANAGER2_IP ]]; then
   exit 1
 fi
 
-# Collect required IP addresses
+# Collect required IP addresses: manager and workers
 MANAGER_IP="$1"
 shift
 WORKER_IPS=( "$@" )
@@ -98,6 +98,7 @@ fi
 echo "${NUM_WORKERS} worker IPs: ${WORKER_IPS[*]}"
 echo
 
+# Replaces a ${token_string} in a file with a value
 swap_in() {
   local f="$1"
   local token_name="$2"
@@ -112,6 +113,7 @@ echo
 echo "Substituting IP addresses and hostnames into Hadoop configurations"
 echo
 
+# Replace in core-site.xml files: manager.ip, worker<i>.ip
 echo "- /etc/hadoop/core-site.xml"
 swap_in /etc/hadoop/core-site.xml manager.ip "${MANAGER_IP}"
 for i in $(seq 1 "$NUM_WORKERS"); do
@@ -119,6 +121,7 @@ for i in $(seq 1 "$NUM_WORKERS"); do
   swap_in /etc/hadoop/core-site.xml "worker${i}.ip" "$w"
 done
 
+# Replace in yarn-site.xml files: manager.ip, manager2.ip, worker<i>.ip
 echo "- /etc/hadoop/yarn-site.xml"
 swap_in /etc/hadoop/yarn-site.xml manager.ip "${MANAGER_IP}"
 swap_in /etc/hadoop/yarn-site.xml manager2.ip "${MANAGER2_IP}"
@@ -132,15 +135,18 @@ if [[ -n $ON_SECOND_MANAGER ]]; then
 fi
 # TBD: remove yarn.resourcemanager.ha.id from worker copies
 
+# Write slaves file based on known worker IP addresses
 echo "- /etc/hadoop/slaves"
 printf '%s\n' "${WORKER_IPS[@]}" | sudo tee /etc/hadoop/slaves > /dev/null
 
+# Replace in zoo.cfg files: worker<i>.ip
 echo "- /opt/zookeeper/conf/zoo.cfg"
 for i in $(seq 1 "$NUM_WORKERS"); do
   w="${WORKER_IPS[$(( i - 1 ))]}"
   swap_in /opt/zookeeper/conf/zoo.cfg "worker${i}.ip" "$w"
 done
 
+# Replace in hive-site.xml: manager.ip, dbserver.name
 echo "- /opt/hive/conf/hive-site.xml"
 if [[ -z $ON_SECOND_MANAGER ]]; then
   swap_in /opt/hive/conf/hive-site.xml manager.ip "${MANAGER_IP}"
@@ -159,6 +165,7 @@ if [[ -n $AWS_ACCESS_KEY ]]; then
   echo "Substituting AWS keys into Hadoop configurations"
   echo
 
+  # Replace in core-site.xml: AWS keys
   echo "- /etc/hadoop/core-site.xml"
   swap_in /etc/hadoop/core-site.xml aws.access.key "${AWS_ACCESS_KEY}"
   swap_in /etc/hadoop/core-site.xml aws.secret.key "${AWS_SECRET_KEY}"
@@ -174,6 +181,7 @@ if [[ -z $ON_SECOND_MANAGER ]]; then
                 /etc/hadoop/yarn-site.xml
                 /opt/zookeeper/conf/zoo.cfg)
 
+  # Copy out configuration files to each worker
   for w in "${WORKER_IPS[@]}"; do
     echo "- $w"
     scp "${WORKER_FILES[@]}" "$w":.
@@ -182,6 +190,7 @@ if [[ -z $ON_SECOND_MANAGER ]]; then
     done
   done
 
+  # Create ZooKeeper myid files, assigning a unique number per worker
   echo
   echo "Creating ZooKeeper myid files on workers"
   for i in $(seq 1 "$NUM_WORKERS"); do

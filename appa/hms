@@ -22,6 +22,7 @@ if [[ -z $1 ]]; then
   exit
 fi
 
+# Define enviroment variables Hive expects
 export HADOOP_HOME=/opt/hadoop
 export HIVE_HOME=/opt/hive
 export SPARK_HOME=/opt/spark
@@ -47,7 +48,7 @@ case "$1" in
       exit
     fi
     echo Stopping Hive Metastore Server
-    kill $(cat "${HIVEMETA_PID_FILE}")
+    kill "$(cat "${HIVEMETA_PID_FILE}")"
     ;;
   status)
     if [[ ! -f "${HIVEMETA_PID_FILE}" ]]; then
