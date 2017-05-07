@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+usage() {
+  cat << EOF
+usage: $0 options instance-id
+
+OPTIONS:
+  -p <profile>  AWS profile (no default)
+  -h            Shows this help message
+EOF
+}
+
+PROFILE=
+
+while getopts "p:h" opt
+do
+  case $opt in
+    h)
+      usage
+      exit 3 # UNKNOWN
+      ;;
+    p)
+      PROFILE="$OPTARG"
+      ;;
+    ?)
+      usage
+      exit 3 # UNKNOWN
+      ;;
+  esac
+done
+shift $((OPTIND - 1))
+
+INSTANCE_ID="$1"
+
+CMD=(aws)
+if [[ -n $PROFILE ]]; then
+  CMD+=(--profile "$PROFILE")
+fi
+CMD+=(ec2 describe-instance-status "--instance-id=${INSTANCE_ID}"\
+      --include-all-instances --query 'InstanceStatuses[0].InstanceStatus.Status')
+
+status=$("${CMD[@]}")
+echo "Instance $INSTANCE_ID status: $status"
+
+if [[ $status == "\"ok\"" ]]; then
+  exit 0 # OK
+else
+  exit 1 # WARNING
+fi

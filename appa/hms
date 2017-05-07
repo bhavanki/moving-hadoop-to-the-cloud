@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+if [[ -z $1 ]]; then
+  echo "Syntax: $0 (start|stop|status)"
+  exit
+fi
+
+export HADOOP_HOME=/opt/hadoop
+export HIVE_HOME=/opt/hive
+export SPARK_HOME=/opt/spark
+export PATH=${HIVE_HOME}/bin:${HADOOP_HOME}/bin:$PATH
+export HADOOP_CONF_DIR=/etc/hadoop
+
+HIVEMETA_LOG_DIR=/var/log/hive
+HIVEMETA_PID_DIR=/var/run/hadoop
+HIVEMETA_PID_FILE="${HIVEMETA_PID_DIR}"/hivemeta.pid
+PORT=9083
+
+case "$1" in
+  start)
+    echo Starting Hive Metastore Server
+    hive --service metastore -p ${PORT} > ${HIVEMETA_LOG_DIR}/metastore.log &
+    PID=$!
+    echo "${PID}" > "${HIVEMETA_PID_FILE}"
+    echo "Hive Metastore Server started [${PID}]"
+    ;;
+  stop)
+    if [[ ! -f "${HIVEMETA_PID_FILE}" ]]; then
+      echo Hive Metastore Server not running
+      exit
+    fi
+    echo Stopping Hive Metastore Server
+    kill $(cat "${HIVEMETA_PID_FILE}")
+    ;;
+  status)
+    if [[ ! -f "${HIVEMETA_PID_FILE}" ]]; then
+      echo Pid file for Hive Metastore Server not found
+      exit 1
+    fi
+    PID=$(cat "${HIVEMETA_PID_FILE}")
+    if kill -0 "${PID}" 2>/dev/null; then
+      echo "Hive Metastore Server is running [${PID}]"
+    else
+      echo "Hive Metastore Server is not running"
+    fi
+    ;;
+esac

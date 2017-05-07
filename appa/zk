@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+if [[ -z $1 ]]; then
+  echo "Syntax: $0 (start|stop|status)"
+  exit
+fi
+
+SLAVES=( $(cat /etc/hadoop/slaves) )
+
+case "$1" in
+  start)
+    echo Starting ZooKeeper
+    for s in "${SLAVES[@]}"; do
+      ssh "$s" /opt/zookeeper/bin/zkServer.sh start
+    done
+    ;;
+  stop)
+    echo Stopping ZooKeeper
+    for s in "${SLAVES[@]}"; do
+      ssh "$s" /opt/zookeeper/bin/zkServer.sh stop
+    done
+    ;;
+  status)
+    echo Checking ZooKeeper status
+    for s in "${SLAVES[@]}"; do
+      ssh "$s" /opt/zookeeper/bin/zkServer.sh status
+    done
+    ;;
+esac
