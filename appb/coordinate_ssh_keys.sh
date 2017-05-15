@@ -172,7 +172,8 @@ for acct in "${ACCOUNTS[@]}"; do
     worker=${worker_ips%%:*}
     echo
     echo "[$acct] Installing public SSH key on $worker"
-    "${SSH_CMD[@]}" -t "${worker}" "sudo -u \"$acct\" mkdir -p -m 0700 /home/$acct/.ssh"
+    "${SSH_CMD[@]}" -t "${worker}" \
+      "sudo -u \"$acct\" mkdir -p -m 0700 /home/$acct/.ssh"
     "${SSH_CMD[@]}" "${worker}" "cat >> /tmp/pubkey" <<< "$pubkey"
     if [[ -n $issshuser ]]; then
       "${SSH_CMD[@]}" -t "${worker}" "sudo cat /tmp/pubkey | sudo -u \"$acct\"" \
@@ -189,7 +190,8 @@ for acct in "${ACCOUNTS[@]}"; do
   # Connect from the manager instance to itself and each worker so that the
   # new host keys are accepted now; this avoids being asked interactively later
   echo
-  echo "[$acct] Connecting to each cluster instance from manager to accept host keys"
+  echo "[$acct] Connecting to each cluster instance from manager to" \
+    "accept host keys"
   if [[ -n $MANAGER_HOSTNAME ]]; then
     "${SSH_CMD[@]}" -t "${MANAGER_PUBLIC_IP}" "sudo -u \"$acct\"" \
       "ssh -o StrictHostKeyChecking=no \"$MANAGER_HOSTNAME\" date > /dev/null"
