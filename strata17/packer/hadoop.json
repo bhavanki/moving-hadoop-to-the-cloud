@@ -1,0 +1,54 @@
+{
+  "_comment": "Copyright 2017 William A. Havanki, Jr.: http://www.apache.org/licenses/LICENSE-2.0",
+  "variables": {
+    "ami_name": null,
+    "region": null,
+    "source_ami": null,
+    "ssh_username": null,
+    "vpc_id": "",
+    "subnet_id": "",
+    "security_group_id": "",
+    "root_device_name": "",
+    "java_package": "openjdk-8-jdk",
+    "java_home": "/usr/lib/jvm/java-1.8.0-openjdk-amd64",
+    "hadoop_version": "2.7.2"
+  },
+  "builders": [{
+    "type": "amazon-ebs",
+    "ami_name": "{{user `ami_name`}}",
+    "instance_type": "m4.large",
+    "region": "{{user `region`}}",
+    "source_ami": "{{user `source_ami`}}",
+    "ssh_pty": "true",
+    "ssh_username": "{{user `ssh_username`}}",
+    "vpc_id": "{{user `vpc_id`}}",
+    "subnet_id": "{{user `subnet_id`}}",
+    "security_group_id": "{{user `security_group_id`}}",
+    "launch_block_device_mappings": [{
+      "device_name": "{{user `root_device_name`}}",
+      "volume_size": 30,
+      "delete_on_termination": true
+    }]
+  }],
+  "provisioners": [
+    {
+      "type": "shell",
+      "script": "prov/packages.sh",
+      "environment_vars": ["JAVA_PACKAGE={{user `java_package`}}"]
+    },
+    {
+      "type": "shell",
+      "script": "prov/users.sh"
+    },
+    {
+      "type": "shell",
+      "script": "prov/hadoop_install.sh",
+      "environment_vars": ["HADOOP_VERSION={{user `hadoop_version`}}"]
+    },
+    {
+      "type": "shell",
+      "script": "prov/hadoop_config.sh",
+      "environment_vars": ["JAVA_HOME={{user `java_home`}}"]
+    }
+  ]
+}
