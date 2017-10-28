@@ -1,5 +1,9 @@
 This directory contains files relevant to the presentation *Automating Cloud Cluster Deployment: Beyond the Book*, given at [Strata Data NYC](https://conferences.oreilly.com/strata/strata-ny) in September 2017. They serve as examples of automating the deployment of Hadoop clusters in AWS, using ideas found in the book *Moving Hadoop to the Cloud*.
 
+If you are looking for the video recording of the presentation, it's available on [Safari](https://www.safaribooksonline.com/library/view/strata-data-conference/9781491976326/video316357.html).
+
+If you are looking for the presentation slides, they are [posted](https://cdn.oreillystatic.com/en/assets/1/event/261/Automating%20cloud%20cluster%20deployment_%20Beyond%20the%20book%20Presentation.pptx) in the conference [proceedings](https://conferences.oreilly.com/strata/strata-ny/public/schedule/proceedings).
+
 ## Prerequisites
 
 * An AWS account with permissions to work with EC2 instances
